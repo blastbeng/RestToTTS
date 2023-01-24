@@ -60,6 +60,8 @@ coverage.xml
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+*db.sqlite3
+*db.sqlite3-journal
 
 # Flask stuff:
 instance/
@@ -103,6 +105,9 @@ celerybeat.pid
 
 # Environments
 .env
+config.json
+.env.prod
+.env.local
 .venv
 env/
 venv/
@@ -127,3 +132,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.vscode/
+config/
+pixray
+pixray/
+diffvg
+diffvg/.env.example
