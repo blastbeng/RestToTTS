@@ -45,7 +45,7 @@ scheduler = APScheduler()
 
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=["10/minute"],
+    default_limits=["20/minute"],
     storage_uri="memory://",
 )
 
@@ -53,17 +53,18 @@ app.config.from_object(Config())
 cache = Cache(app)
 api = Api(app)
 
-nsaudio = api.namespace('audio', 'TTS APIs')
 
-parserspeak= reqparse.RequestParser()
-parserspeak.add_argument("text", type=str)
-parserspeak.add_argument("voice", type=str)
+def get_response_str(text: str):
+    r = Response(response=text, status=200, mimetype="text/xml")
+    r.headers["Content-Type"] = "text/xml; charset=utf-8"
+    return r
+
+nsaudio = api.namespace('audio', 'TTS APIs')
 
 @nsaudio.route('/speak/<string:text>/')
 @nsaudio.route('/speak/<string:text>/<string:voice>/')
 class AudioSpeakClass(Resource):
-  @api.expect(parserspeak)
-  @cache.cached(timeout=7200, query_string=True)
+  @cache.cached(timeout=600, query_string=True)
   def get (self, text: str, voice = "random"):
     try:
       tts_out = utils.get_tts(text, voice=voice)
@@ -81,6 +82,12 @@ class AudioSpeakClass(Resource):
         cache.delete_memoized(AudioRepeatClass.get, self, str, str, str)
         return make_response(g.get('request_error'), 500)
 
+nsdatabase = api.namespace('database', 'DATABASE APIs')
+
+@nsdatabase.route('/delete/bytext/<string:text>/')
+class UtilsDeleteByText(Resource):
+  def get (self, text: str):
+    return get_response_str(audiodb.delete_by_name(text))
 
 nsutils = api.namespace('utils', 'UTILS APIs')
 

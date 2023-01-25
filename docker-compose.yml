@@ -25,7 +25,7 @@ services:
       - caching
   redis:
     image: redis
-    container_name: discord-voicebot-redis
+    container_name: rest-to-tts-redis
     networks:
       - caching
     restart: "no"

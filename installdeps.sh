@@ -5,5 +5,6 @@ mkdir -p $TMPDIR
 source .venv/bin/activate; pip3 install wheel
 source .venv/bin/activate; pip3 install -r requirements.txt
 mkdir -p ./config
+cp uwsgi.ini ./config/uwsgi.ini 
 
 rm -rf $TMPDIR/*

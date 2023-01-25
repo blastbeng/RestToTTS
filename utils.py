@@ -57,7 +57,8 @@ def get_tts_google(text: str):
     fp.seek(0)
     sound = AudioSegment.from_mp3(fp)
     memoryBuff = BytesIO()
-    sound.export(memoryBuff, format='mp3', bitrate="256")
+    sound.export(memoryBuff, format='mp3', bitrate="256", tags={'artist': get_voice_name("google")})
+    #awesome.export("mashup.mp3", format="mp3", tags={'artist': 'Various artists', 'album': 'Best of 2011', 'comments': 'This album is awesome!'})
     memoryBuff.seek(0)
     audiodb.insert(text, memoryBuff, "google")
     return audiodb.select_by_name_voice(text, "google")
@@ -75,7 +76,7 @@ def get_tts(text: str, voice=None, timeout=600):
       else:
         ijt = generate_ijt(fy, text.strip(), voice_to_use)
         if ijt is not None:
-          out = get_wav_fy(fy,ijt, timeout=timeout)
+          out = get_wav_fy(fy,ijt, voice_to_use, timeout=timeout)
           if out is not None:
             audiodb.insert(text.strip(), out, voice_to_use)
             return audiodb.select_by_name_voice(text.strip(), voice_to_use)
@@ -98,6 +99,10 @@ def get_tts(text: str, voice=None, timeout=600):
     else:
       raise Exception(e)
 
+def get_voice_name(voice: str):
+  keys = [k for k, v in localvoices.items() if v == voice]
+  return key
+
 def get_random_voice():
   localvoices = get_configured_voices()
   title, token = random.choice(list(localvoices.items()))
@@ -112,31 +117,21 @@ def get_configured_voices():
       localvoices[key] = item
     return localvoices
   else:
-    localvoices["Caparezza"]                    = "TM:nk1h2vqxhzdc"
-    localvoices["Checco Zalone"]                = "TM:pvw8tsm764rw"
-    localvoices["Christian De Sica"]            = "TM:120y78vm4nyb"
     localvoices["Duke Nukem"]                   = "TM:cq3p31567cbh"
     localvoices["Gerry Scotti"]                 = "TM:5ggf3m5w2mhq"
     localvoices["google"]                       = "google"
     localvoices["Homer Simpson"]                = "TM:dq50arje7sq4"
-    localvoices["Mario Giordano"]               = "TM:xd8srfb4v5w6"
-    localvoices["Papa Francesco"]               = "TM:8bqjb9x51vz3"  
+    localvoices["Maccio Capatonda"]             = "TM:ahx65p1gk6b4"
     localvoices["Paolo Bonolis"]                = "TM:zdag8n18q9ct"
     localvoices["Peter Griffin"]                = "TM:s493mhsbek15" 
-    localvoices["Roberto Benigni"]              = "TM:vjfm5tdz02b2" 
     localvoices["Silvio Berlusconi"]            = "TM:22e5sxvt2dvk"
-    db["Caparezza"]                             = "TM:nk1h2vqxhzdc"
-    db["Checco Zalone"]                         = "TM:pvw8tsm764rw"
-    db["Christian De Sica"]                     = "TM:120y78vm4nyb"
     db["Duke Nukem"]                            = "TM:cq3p31567cbh"
     db["Gerry Scotti"]                          = "TM:5ggf3m5w2mhq"
     db["google"]                                = "google"
     db["Homer Simpson"]                         = "TM:dq50arje7sq4"
-    db["Mario Giordano"]                        = "TM:xd8srfb4v5w6"
-    db["Papa Francesco"]                        = "TM:8bqjb9x51vz3"  
+    db["Maccio Capatonda"]                      = "TM:ahx65p1gk6b4"
     db["Paolo Bonolis"]                         = "TM:zdag8n18q9ct" 
     db["Peter Griffin"]                         = "TM:s493mhsbek15" 
-    db["Roberto Benigni"]                       = "TM:vjfm5tdz02b2" 
     db["Silvio Berlusconi"]                     = "TM:22e5sxvt2dvk"
     db.commit()
     return localvoices
@@ -166,7 +161,7 @@ def generate_ijt(fy,text:str,ttsModelToken:str):
     raise TooManyRequests("FakeYou: too many requests.")
 
 
-def get_wav_fy(fy,ijt:str, timeout:int):
+def get_wav_fy(fy,ijt:str, voice:str, timeout:int):
   count = 0
   while True:
     handler=fy.session.get(url=fy.baseurl+f"tts/job/{ijt}")
@@ -189,7 +184,7 @@ def get_wav_fy(fy,ijt:str, timeout:int):
         fp.seek(0)
         sound = AudioSegment.from_wav(fp)
         memoryBuff = BytesIO()
-        sound.export(memoryBuff, format='mp3', bitrate="256")
+        sound.export(memoryBuff, format='mp3', bitrate="256", tags={'artist': get_voice_name(voice))})
         memoryBuff.seek(0)
         return memoryBuff
         #return fp

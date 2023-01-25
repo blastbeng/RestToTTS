@@ -126,27 +126,22 @@ def select_audio_by_id(id: int):
 
 def delete_by_name(name: str):
   try:
-    sqliteConnection = sqlite3.connect("./config/audiodb.sqlite3")
+    dbfile="./config/audiodb.sqlite3"
+    sqliteConnection = sqlite3.connect(dbfile)
     cursor = sqliteConnection.cursor()
 
-    sqlite_delete_query = """DELETE from Audio 
-                          WHERE 
-                          (name like ?
-                          OR name like ?
-                          OR name = ?)"""
+    sqlite_delete_query = "DELETE FROM Audio WHERE chatid = '" + chatid + "' and (name like '" + name + "%' OR name like '%" + name + "' OR name LIKE '%" + name + "%' OR name = '" + name + "') COLLATE NOCASE"
 
+    data_tuple = ()
 
-    data_tuple = (name+'%', 
-                  '%'+name, 
-                  name) 
+    logging.info("delete_from_audiodb_by_text - Executing:  %s", sqlite_delete_query, exc_info=1)
+
     cursor.execute(sqlite_delete_query, data_tuple)
-
     sqliteConnection.commit()
     cursor.close()
 
-  except Exception as e:
-    logging.error("Failed to read data from sqlite table", exc_info=1)
-    raise Exception(e)
+  except sqlite3.Error as error:
+    logging.error("Failed to delete data from sqlite", exc_info=1)
   finally:
     if sqliteConnection:
-      sqliteConnection.close()
+        sqliteConnection.close()
